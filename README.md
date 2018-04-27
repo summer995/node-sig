@@ -7,6 +7,9 @@ not stable yet and only for fun
 
 Just run:
 npm install -g node-gyp
+
 npm install
+
 node-gyp rebuild
+
 node sig_test.js
