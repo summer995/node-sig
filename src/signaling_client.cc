@@ -105,8 +105,6 @@ void SignalingClient::New(const Nan::FunctionCallbackInfo<Value> &args) {
     args.GetReturnValue().Set(cons->NewInstance(argc, argv));
   }
   uv_async_init(uv_default_loop(), &async, OnMessage);
-  // uv_async_init(uv_default_loop(), &async,
-  // std::bind(&SignalingClient::OnMessage, this));
 }
 
 void SignalingClient::SendInstantMessage(

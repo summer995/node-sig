@@ -1,6 +1,8 @@
-var SignalingClient = require('./build/Release/signaling-client');
+//var SignalingClient = require('./build/Release/signaling-client');
+var SignalingClient = require('./index');
 
-var signaling_client = new SignalingClient.SignalingClient("myaccount",true);
+
+var signaling_client = new SignalingClient.SignalingClient("sdk_myaccount",true);
 
 signaling_client.SetLoginSuccessCallback(function (uid, fd) {
   console.log("on LoginSuccess: uid: " + uid + ", fd: " + fd);
