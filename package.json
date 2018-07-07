@@ -1,6 +1,6 @@
 {
   "name": "agora-sig-node",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "agora signaling node version sdk",
   "main": "index.js",
   "scripts": {
