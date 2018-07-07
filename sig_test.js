@@ -1,6 +1,6 @@
-var addon = require('./build/Release/addon');
+var SignalingClient = require('./build/Release/signaling-client');
 
-var signaling_client = new addon.SignalingClient("myaccount",true);
+var signaling_client = new SignalingClient.SignalingClient("myaccount",true);
 
 signaling_client.SetLoginSuccessCallback(function (uid, fd) {
   console.log("on LoginSuccess: uid: " + uid + ", fd: " + fd);
