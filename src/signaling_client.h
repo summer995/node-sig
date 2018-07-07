@@ -43,7 +43,8 @@ class SignalingClient : public Nan::ObjectWrap,
   static void SetBCCallback(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
  private:
-  SignalingClient(const std::string &account, bool is_test_env);
+  SignalingClient(const std::string &APP_ID, const std::string &SIGNKEY_SIGNAL,
+                  const std::string &account, bool is_test_env);
   virtual ~SignalingClient();
 
   bool InitSignaling();
@@ -92,4 +93,6 @@ class SignalingClient : public Nan::ObjectWrap,
   agora_sdk_cpp::IAgoraAPI *signaling_;
   std::string account_;
   bool is_test_env_;
+  std::string APP_ID;
+  std::string SIGNKEY_SIGNAL;
 };

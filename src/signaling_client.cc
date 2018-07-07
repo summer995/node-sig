@@ -17,10 +17,6 @@ using std::endl;
 
 uv_async_t async;
 
-static const std::string APP_ID("3e75eb10860d4ee4826bdae1ae7c4121");  // NOLINT
-static const std::string SIGNKEY_SIGNAL(
-    "2b66ded51a9541cfb5f6319053b192bd");             // NOLINT
-
 enum LoginStatus {
   LOGIN_STATUS_NOT_LOGIN,
   LOGIN_STATUS_LOGGING,
@@ -62,8 +58,13 @@ void SignalingClient::Init(Local<Object> exports) {
                tpl->GetFunction());
 }
 
-SignalingClient::SignalingClient(const std::string &account, bool is_test_env)
-    : account_(account), is_test_env_(is_test_env) {
+SignalingClient::SignalingClient(const std::string &_APP_ID,
+                                 const std::string &_SIGNKEY_SIGNAL,
+                                 const std::string &account, bool is_test_env)
+    : account_(account),
+      is_test_env_(is_test_env),
+      APP_ID(_APP_ID),
+      SIGNKEY_SIGNAL(_SIGNKEY_SIGNAL) {
   login_status_ = LOGIN_STATUS_NOT_LOGIN;
   signaling_ = nullptr;
 }
@@ -73,7 +74,7 @@ SignalingClient::~SignalingClient() {
 }
 
 void OnMessage(uv_async_t *handle) {
-  //fprintf(stdout, "OnMessage notified ********\n");
+  // fprintf(stdout, "OnMessage notified ********\n");
   SignalingClient *sig = static_cast<SignalingClient *>(handle->data);
   if (sig == nullptr) return;
   while (sig->queue_.size() != 0) {
@@ -84,23 +85,31 @@ void OnMessage(uv_async_t *handle) {
 
 void SignalingClient::New(const Nan::FunctionCallbackInfo<Value> &args) {
   string account;
+  string appid;
+  string sig_key;
   if (args.IsConstructCall()) {
     // Invoked as constructor: `new SignalingClient(...)` string account;
-    if (args[0]->IsString()) {
-      String::Utf8Value str(args[0]->ToString());
-      account = (const char *)(*str);
-    } else {
-      account = "test_account";
+    if (!args[0]->IsString() || !args[1]->IsString() || !args[2]->IsString() ||
+        !args[3]->IsBoolean()) {
+      Nan::ThrowTypeError("Wrong argument type!");
+      return;
     }
-    bool value = args[1]->IsBoolean() ? true : args[1]->BooleanValue();
-    SignalingClient *obj = new SignalingClient(account, value);
+    String::Utf8Value appid_str(args[0]->ToString());
+    appid = (const char *)(*appid_str);
+    String::Utf8Value sig_key_str(args[1]->ToString());
+    sig_key = (const char *)(*sig_key_str);
+    String::Utf8Value account_str(args[2]->ToString());
+    account = (const char *)(*account_str);
+    bool is_test_env = args[3]->BooleanValue();
+    SignalingClient *obj =
+        new SignalingClient(appid, sig_key, account, is_test_env);
     obj->Wrap(args.This());
     args.GetReturnValue().Set(args.This());
   } else {
     // Invoked as plain function `SignalingClient(...)`, turn into construct
     // call.
-    const int argc = 1;
-    Local<Value> argv[argc] = {args[0]};
+    const int argc = 3;
+    Local<Value> argv[argc] = {args[2]};
     Local<Function> cons = Nan::New<v8::Function>(constructor);
     args.GetReturnValue().Set(cons->NewInstance(argc, argv));
   }
@@ -385,13 +394,15 @@ bool SignalingClient::CheckLoginStatus() {
 void SignalingClient::BCCall(const std::string &func,
                              const std::string &call_id,
                              const std::string &join_str) {
-  cout << "BCCall: call_id: " << call_id << " join_str: " << join_str << endl;
+  cout << account_ << " send BCCall: call_id: " << call_id
+       << " join_str: " << join_str << endl;
   signaling_->bc_call(func.c_str(), func.length(), join_str.c_str(),
                       join_str.length(), call_id.c_str(), call_id.length());
 }
 void SignalingClient::InstantMessage(const std::string &account,
                                      const std::string &msg) {
-  cout << "InstantMessage: " << endl;
+  cout << account_ << " send InstantMessage: " << msg
+       << " to account: " << account << endl;
   signaling_->messageInstantSend(account.c_str(), account.size(), 0,
                                  msg.c_str(), msg.size(), "", 0);
 }
